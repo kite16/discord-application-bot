@@ -3,15 +3,42 @@
 const Discord = require('discord.js');
 const auth = require("./auth.json");
 let applicationQuestions = require("./application-questions.js");
+const webhookClient = new Discord.WebhookClient('794570257397186580', 'QwnElq-t-arH99Zm9TzouUYmNnSluSP8Evu2JH5GkBMz3fv-6GEmjc1R7C2LiFXKLJc8');
+const webhookClient101 = new Discord.WebhookClient('794585593237471273', 'H7x2NxUkT3e0SYKra_8RAScaMmMK1tEDTBKMc86TTyEyS2TeIMCv2ebRSaK1aQdtR9Tj');
 
 const client = new Discord.Client();
-const botChar = "$";
+const botChar = "_";
 let usersApplicationStatus = [];
 let appNewForm = [];
 let isSettingFormUp = false;
 let userToSubmitApplicationsTo = null;
 
-const applicationFormCompleted = (data) => {
+
+client.on("ready", () =>{
+	console.log(`Bot is online!`);
+	client.user.setStatus('online');
+    client.user.setPresence({
+        game: { 
+            name: 'you watch my status',
+            type: 'WATCHING'
+        },
+	})  
+});
+
+
+
+
+
+
+
+
+
+
+
+  const applicationFormCompleted = (data, msg, member) => {
+  
+  
+  
 	let i = 0, answers = "";
 
 	for (; i < applicationQuestions.length; i++) {
@@ -19,14 +46,15 @@ const applicationFormCompleted = (data) => {
 	}
 
 	if (userToSubmitApplicationsTo)
-		userToSubmitApplicationsTo.send(`${data.user.username} has submitted a form.\n${answers}`);
+		//userToSubmitApplicationsTo.send(`${data.user.username} has submitted a form.\n${answers}`);
+
+		webhookClient.send(`\`\`\`${data.user.username} has submitted a form.\n${answers}\`\`\``);
+		webhookClient101.send(`\`\`\`${data.user.username} has just submitted their application for Clan Member.\`\`\``);
+
 };
 
 const addUserToRole = (msg, roleName) => {
-	if (roleName === "Admin") {
-		msg.reply("Stop trying to commit mutiny.")
-		return;
-	}
+
 
 	if (roleName && msg.guild) {
 		const role = msg.guild.roles.find("name", roleName);
@@ -73,11 +101,8 @@ const applicationFormSetup = (msg) => {
 		msg.reply("This command can only be used in a guild.");
 		return;
 	}
+    if(!msg.member.hasPermission("ADMINISTRATOR")) return msg.channel.send('You can\'t use that!')
 
-	if (!msg.member.roles.find("name", "Admin")) {
-		msg.reply("This command can only be used by an admin.");
-		return;
-	}
 
 	if (isSettingFormUp) {
 		msg.reply("Someone else is already configuring the form.");
@@ -106,18 +131,12 @@ const setApplicationSubmissions = (msg) => {
 		return;
 	}
 
-	if (!msg.member.roles.find("name", "Admin")) {
-		msg.reply("Only admins can do this.")
-		return;
-	}
+    if(!msg.member.hasPermission("ADMINISTRATOR")) return msg.channel.send('You can\'t use that!')
 
 	userToSubmitApplicationsTo = msg.author;
 	msg.reply("Form submissions will now be sent to you.")
 };
 
-client.on('ready', () => {
-	console.log(`Logged in as ${client.user.tag}!`);
-});
 
 client.on('message', msg => {
 	if (msg.content.charAt(0) === botChar) {
@@ -156,7 +175,7 @@ client.on('message', msg => {
 				setApplicationSubmissions(msg);
 				break;
 			case "help":
-				msg.reply(`Available commands: \`\`\`${botChar}apply, ${botChar}addrole, ${botChar}setup, ${botChar}endsetup, ${botChar}setsubmissions, ${botChar}help\`\`\``);
+				msg.reply(`Available commands: \`\`\`${botChar}apply, ${botChar}setup, ${botChar}endsetup, ${botChar}setsubmissions\`\`\``);
 				break;
 			default:
 				msg.reply("I do not know this command.");
@@ -174,8 +193,6 @@ client.on('message', msg => {
 
 					if (user.currentStep >= applicationQuestions.length) {
 						if (!userToSubmitApplicationsTo) {
-							msg.author.send("The server admin has not configured $setsubmissions.");
-							return;
 						}
 						applicationFormCompleted(user);
 						msg.author.send("Congratulations your application has been sent!");
