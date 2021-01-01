@@ -4,7 +4,8 @@
 	"description": "A custom application bot for discord.",
 	"main": "index.js",
 	"dependencies": {
-		"discord.js": "^11.4.2"
+		"discord.js": "^11.6.4",
+		"node": "^15.4.0"
 	},
 	"devDependencies": {},
 	"scripts": {
